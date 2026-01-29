@@ -1,0 +1,22 @@
+{"timestamp":"2026-01-25T12:23:40.465121Z","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2026-01-25T12:23:40.466026Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/daily_job_scraper.py","logger":"airflow.models.dagbag.DagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-01-25T12:23:40.478932Z","level":"warning","event":"The `airflow.operators.python.PythonOperator` attribute is deprecated. Please use `'airflow.providers.standard.operators.python.PythonOperator'`.","category":"DeprecatedImportWarning","filename":"/opt/airflow/dags/daily_job_scraper.py","lineno":2,"logger":"py.warnings"}
+{"timestamp":"2026-01-25T12:23:40.492281Z","level":"info","event":"Task instance is in running state","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.493910Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.493976Z","level":"info","event":"Current task name:scrape_remoteOK","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.494019Z","level":"info","event":"Dag name:daily_job_scraper","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.494083Z","level":"info","event":"Starting RemoteOK scrape...","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.679185Z","level":"info","event":"Fetched 99 raw jobs from RemoteOK","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.682835Z","level":"info","event":"Error processing job: 2 validation errors for Job","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.682965Z","level":"info","event":"description","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.683042Z","level":"info","event":"  String should have at least 10 characters [type=string_too_short, input_value='', input_type=str]","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.683123Z","level":"info","event":"    For further information visit https://errors.pydantic.dev/2.12/v/string_too_short","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.683206Z","level":"info","event":"url","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.683290Z","level":"info","event":"  Input should be a valid URL, input is empty [type=url_parsing, input_value='', input_type=str]","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.683386Z","level":"info","event":"    For further information visit https://errors.pydantic.dev/2.12/v/url_parsing","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.764482Z","level":"info","event":"Successfully stored 0/99 RemoteOK jobs","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.764588Z","level":"info","event":"Done. Returned value was: 0","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator","filename":"python.py","lineno":216}
+{"timestamp":"2026-01-25T12:23:40.764699Z","level":"info","event":"Pushing xcom","ti":"RuntimeTaskInstance(id=UUID('019bf51c-1b70-7b4d-b2eb-273ac5604b67'), task_id='scrape_remoteOK', dag_id='daily_job_scraper', run_id='manual__2026-01-25T12:23:37+00:00', try_number=1, dag_version_id=UUID('019bf50b-8394-7fc6-a3bf-4fae16332940'), map_index=-1, hostname='55291c06a033', context_carrier={}, task=<Task(PythonOperator): scrape_remoteOK>, bundle_instance=LocalDagBundle(name=dags-folder), max_tries=2, start_date=datetime.datetime(2026, 1, 25, 12, 23, 39, 308108, tzinfo=datetime.timezone.utc), end_date=None, state=<TaskInstanceState.RUNNING: 'running'>, is_mapped=False, rendered_map_index=None)","logger":"task","filename":"task_runner.py","lineno":1450}
+{"timestamp":"2026-01-25T12:23:40.779529Z","level":"info","event":"Task instance in success state","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.779638Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","logger":"task.stdout"}
+{"timestamp":"2026-01-25T12:23:40.779705Z","level":"info","event":"Task operator:<Task(PythonOperator): scrape_remoteOK>","logger":"task.stdout"}

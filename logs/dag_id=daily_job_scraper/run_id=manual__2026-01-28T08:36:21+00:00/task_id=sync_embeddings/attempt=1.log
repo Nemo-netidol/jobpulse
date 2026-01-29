@@ -1,0 +1,19 @@
+{"timestamp":"2026-01-28T08:36:26.949574Z","level":"info","event":"DAG bundles loaded: dags-folder","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2026-01-28T08:36:26.949832Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/daily_job_scraper.py","logger":"airflow.models.dagbag.DagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-01-28T08:36:27.182446Z","level":"warning","event":"The `airflow.operators.python.PythonOperator` attribute is deprecated. Please use `'airflow.providers.standard.operators.python.PythonOperator'`.","category":"DeprecatedImportWarning","filename":"/opt/airflow/dags/daily_job_scraper.py","lineno":2,"logger":"py.warnings"}
+{"timestamp":"2026-01-28T08:36:27.207273Z","level":"info","event":"Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.","logger":"chromadb.telemetry.product.posthog","filename":"posthog.py","lineno":22}
+{"timestamp":"2026-01-28T08:36:27.257993Z","level":"info","event":"✅ EmbeddingService ready","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.258317Z","level":"info","event":"Found 0 jobs to embed","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.258394Z","level":"info","event":"","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.258434Z","level":"info","event":"============================================================","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.258500Z","level":"info","event":"Sync Complete!","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.258579Z","level":"info","event":"============================================================","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.258617Z","level":"info","event":"✅ Success: 0/0","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.258651Z","level":"info","event":"❌ Failed: 0/0","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.265723Z","level":"info","event":"","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.265804Z","level":"info","event":"📊 Database Status:","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.265841Z","level":"info","event":"   SQLite total: 0","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.265877Z","level":"info","event":"   With embeddings: 0","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.265910Z","level":"info","event":"   Pending: 0","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.265944Z","level":"info","event":"   ChromaDB total: 4","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:36:27.265986Z","level":"info","event":"Done. Returned value was: None","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator","filename":"python.py","lineno":216}

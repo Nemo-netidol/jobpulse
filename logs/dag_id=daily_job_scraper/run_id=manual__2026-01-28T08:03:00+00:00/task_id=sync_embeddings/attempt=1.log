@@ -1,0 +1,28 @@
+{"timestamp":"2026-01-28T08:03:08.358285Z","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2026-01-28T08:03:08.358493Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/daily_job_scraper.py","logger":"airflow.models.dagbag.DagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-01-28T08:03:08.578354Z","level":"warning","event":"The `airflow.operators.python.PythonOperator` attribute is deprecated. Please use `'airflow.providers.standard.operators.python.PythonOperator'`.","category":"DeprecatedImportWarning","filename":"/opt/airflow/dags/daily_job_scraper.py","lineno":2,"logger":"py.warnings"}
+{"timestamp":"2026-01-28T08:03:08.585574Z","level":"info","event":"Task instance is in running state","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:08.585957Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:08.586058Z","level":"info","event":"Current task name:sync_embeddings","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:08.586106Z","level":"info","event":"Dag name:daily_job_scraper","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:08.592430Z","level":"info","event":"Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.","logger":"chromadb.telemetry.product.posthog","filename":"posthog.py","lineno":22}
+{"timestamp":"2026-01-28T08:03:08.742627Z","level":"info","event":"✅ EmbeddingService ready","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:08.742865Z","level":"info","event":"Found 2 jobs to embed","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:37.654595Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:56.993659Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:56.997121Z","level":"info","event":"","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.000278Z","level":"info","event":"============================================================","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.000605Z","level":"info","event":"Sync Complete!","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.000820Z","level":"info","event":"============================================================","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.001047Z","level":"info","event":"✅ Success: 2/2","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.001116Z","level":"info","event":"❌ Failed: 0/2","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.005936Z","level":"info","event":"","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.008889Z","level":"info","event":"📊 Database Status:","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.009058Z","level":"info","event":"   SQLite total: 99","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.009172Z","level":"info","event":"   With embeddings: 4","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.009388Z","level":"info","event":"   Pending: 95","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.009432Z","level":"info","event":"   ChromaDB total: 4","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.007179Z","level":"info","event":"Done. Returned value was: None","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator","filename":"python.py","lineno":216}
+{"timestamp":"2026-01-28T08:03:57.030997Z","level":"info","event":"Task instance in success state","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.031308Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","logger":"task.stdout"}
+{"timestamp":"2026-01-28T08:03:57.031408Z","level":"info","event":"Task operator:<Task(PythonOperator): sync_embeddings>","logger":"task.stdout"}

@@ -1,0 +1,14 @@
+{"timestamp":"2026-01-29T07:34:43.393452Z","level":"info","event":"DAG bundles loaded: dags-folder","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2026-01-29T07:34:43.393788Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/daily_job_scraper.py","logger":"airflow.models.dagbag.DagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-01-29T07:34:43.672705Z","level":"warning","event":"The `airflow.operators.python.PythonOperator` attribute is deprecated. Please use `'airflow.providers.standard.operators.python.PythonOperator'`.","category":"DeprecatedImportWarning","filename":"/opt/airflow/dags/daily_job_scraper.py","lineno":2,"logger":"py.warnings"}
+{"timestamp":"2026-01-29T07:34:43.685624Z","level":"info","event":"","logger":"task.stdout"}
+{"timestamp":"2026-01-29T07:34:43.685756Z","level":"info","event":"    ====================================","logger":"task.stdout"}
+{"timestamp":"2026-01-29T07:34:43.685828Z","level":"info","event":"    JobPulse Daily Run Summary","logger":"task.stdout"}
+{"timestamp":"2026-01-29T07:34:43.685886Z","level":"info","event":"    ====================================","logger":"task.stdout"}
+{"timestamp":"2026-01-29T07:34:43.685941Z","level":"info","event":"    Database Status:","logger":"task.stdout"}
+{"timestamp":"2026-01-29T07:34:43.685995Z","level":"info","event":"       Total Jobs: 0","logger":"task.stdout"}
+{"timestamp":"2026-01-29T07:34:43.686046Z","level":"info","event":"       With Embeddings: 0","logger":"task.stdout"}
+{"timestamp":"2026-01-29T07:34:43.686097Z","level":"info","event":"       Pending: 0","logger":"task.stdout"}
+{"timestamp":"2026-01-29T07:34:43.686146Z","level":"info","event":"","logger":"task.stdout"}
+{"timestamp":"2026-01-29T07:34:43.685880Z","level":"info","event":"Done. Returned value was: \n    ====================================\n    JobPulse Daily Run Summary\n    ====================================\n    Database Status:\n       Total Jobs: 0\n       With Embeddings: 0\n       Pending: 0\n    ","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator","filename":"python.py","lineno":216}
+{"timestamp":"2026-01-29T07:34:43.686004Z","level":"info","event":"Pushing xcom","ti":"RuntimeTaskInstance(id=UUID('019c08aa-93aa-74d6-b5c5-44716e749d9c'), task_id='summary', dag_id='daily_job_scraper', run_id='manual__2026-01-29T07:32:01+00:00', try_number=1, dag_version_id=UUID('019c08a3-7e4c-7ae9-9ef4-d1615f5a11d9'), map_index=-1, hostname='095db180508a', context_carrier={}, task=<Task(PythonOperator): summary>, bundle_instance=LocalDagBundle(name=dags-folder), max_tries=2, start_date=datetime.datetime(2026, 1, 29, 7, 34, 43, 370901, tzinfo=datetime.timezone.utc), end_date=None, state=<TaskInstanceState.RUNNING: 'running'>, is_mapped=False, rendered_map_index=None)","logger":"task","filename":"task_runner.py","lineno":1450}

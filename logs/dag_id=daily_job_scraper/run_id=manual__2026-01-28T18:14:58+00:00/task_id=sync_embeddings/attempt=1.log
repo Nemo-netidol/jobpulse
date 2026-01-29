@@ -1,0 +1,31 @@
+{"timestamp":"2026-01-28T18:15:05.832930Z","level":"info","event":"DAG bundles loaded: dags-folder","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2026-01-28T18:15:05.833210Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/daily_job_scraper.py","logger":"airflow.models.dagbag.DagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-01-28T18:15:06.083224Z","level":"warning","event":"The `airflow.operators.python.PythonOperator` attribute is deprecated. Please use `'airflow.providers.standard.operators.python.PythonOperator'`.","category":"DeprecatedImportWarning","filename":"/opt/airflow/dags/daily_job_scraper.py","lineno":2,"logger":"py.warnings"}
+{"timestamp":"2026-01-28T18:15:06.191446Z","level":"info","event":"Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.","logger":"chromadb.telemetry.product.posthog","filename":"posthog.py","lineno":22}
+{"timestamp":"2026-01-28T18:15:06.232652Z","level":"info","event":"✅ EmbeddingService ready","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:15:06.233227Z","level":"info","event":"Found 15 jobs to embed","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:15:21.689742Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:15:58.957158Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:03.186538Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:03.568330Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:04.070791Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:04.072936Z","level":"info","event":"Processed 5/15 jobs...","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:17.486422Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:27.879808Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:38.460063Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:39.340715Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:39.794051Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:39.795352Z","level":"info","event":"Processed 10/15 jobs...","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:40.221713Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:16:53.140830Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:05.008248Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:05.511520Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:17.533619Z","level":"info","event":"add job successfully","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:17.535615Z","level":"info","event":"Processed 15/15 jobs...","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:17.535887Z","level":"info","event":"","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:17.536024Z","level":"info","event":"============================================================","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:17.536105Z","level":"info","event":"Sync Complete!","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:17.536195Z","level":"info","event":"============================================================","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:17.536495Z","level":"info","event":"✅ Success: 15/15","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:17.536843Z","level":"info","event":"❌ Failed: 0/15","logger":"task.stdout"}
+{"timestamp":"2026-01-28T18:17:17.544817Z","level":"error","event":"Task failed with exception","logger":"task","filename":"task_runner.py","lineno":1078,"error_detail":[{"exc_type":"AttributeError","exc_value":"'VectorDatabase' object has no attribute 'collection'","exc_notes":[],"syntax_error":null,"is_cause":false,"frames":[{"filename":"/home/airflow/.local/lib/python3.12/site-packages/airflow/sdk/execution_time/task_runner.py","lineno":1004,"name":"run"},{"filename":"/home/airflow/.local/lib/python3.12/site-packages/airflow/sdk/execution_time/task_runner.py","lineno":1405,"name":"_execute_task"},{"filename":"/home/airflow/.local/lib/python3.12/site-packages/airflow/sdk/bases/operator.py","lineno":417,"name":"wrapper"},{"filename":"/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/standard/operators/python.py","lineno":214,"name":"execute"},{"filename":"/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/standard/operators/python.py","lineno":237,"name":"execute_callable"},{"filename":"/home/airflow/.local/lib/python3.12/site-packages/airflow/sdk/execution_time/callback_runner.py","lineno":82,"name":"run"},{"filename":"/opt/airflow/dags/daily_job_scraper.py","lineno":63,"name":"sync_embedding"},{"filename":"/opt/airflow/dags/include/embedding_service.py","lineno":43,"name":"sync_embeddings"},{"filename":"/opt/airflow/dags/include/vector_db.py","lineno":77,"name":"get_stats"}],"is_group":false,"exceptions":[]}]}

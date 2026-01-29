@@ -1,0 +1,9 @@
+requests
+pydantic
+chromadb
+huggingface_hub
+tqdm
+python-dotenv
+langchain_core
+langchain_chroma
+langchain-huggingface
