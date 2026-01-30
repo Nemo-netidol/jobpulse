@@ -22,5 +22,5 @@ docker compose up -d
 
 ## Author
 Nakorn Boonprasong \
-Linkedln: https://www.linkedin.com \
+Linkedln: https://www.linkedin.com/in/nakornb/ \
 Email: boonprasonganakorn@gmail.com
