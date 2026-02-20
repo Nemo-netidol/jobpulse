@@ -5,11 +5,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+MAX_CHARS_PER_DOC = 500
+
 def format_docs(docs):
-    return "\n\n".join(
-        f"{doc.metadata.get('title', 'N/A')} at {doc.metadata.get('company', 'N/A')}, {doc.metadata.get('location', 'N/A')}: {doc.page_content}"
-        for doc in docs
-    )
+    formatted = []
+    for doc in docs:
+        title    = doc.metadata.get('title', 'N/A')
+        company  = doc.metadata.get('company', 'N/A')
+        location = doc.metadata.get('location', 'N/A')
+        # Truncate long descriptions so the total prompt stays within token limits
+        content  = doc.page_content[:MAX_CHARS_PER_DOC]
+        if len(doc.page_content) > MAX_CHARS_PER_DOC:
+            content += "..."
+        formatted.append(f"{title} at {company}, {location}: {content}")
+    return "\n\n".join(formatted)
 
 class LLMService:
     def __init__(self, vector_db):
@@ -46,6 +55,7 @@ Answer the question based on the above context: {question}
                         "content": prompt
                     }
                 ],
+                max_tokens=1024,
             )
 
             return completion.choices[0].message.content
