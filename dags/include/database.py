@@ -85,6 +85,10 @@ class Database:
         cursor = self.conn.execute("SELECT * FROM jobs ORDER BY scraped_at DESC")
         return [dict(row) for row in cursor.fetchall()]
     
+    def get_data_count(self):
+        cursor = self.conn.execute("SELECT COUNT(*) FROM jobs")
+        return cursor.fetchall()
+    
     def mark_as_embedded(self, job_id) -> bool:
         try:
             self.conn.execute(

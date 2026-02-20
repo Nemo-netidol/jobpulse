@@ -76,3 +76,7 @@ class VectorDatabase:
             "total_embeddings": count,
             "collection_name": "jobs"
         }
+    
+    def get_data_count(self):
+        num_records = self.vectorstore._collection.count()
+        return num_records

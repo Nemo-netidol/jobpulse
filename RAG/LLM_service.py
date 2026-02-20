@@ -52,6 +52,9 @@ Answer the question based on the above context: {question}
         except Exception as e:
             print(f"Query error: {e}")
             return f"Error processing query: {str(e)}"
+        
+    def get_data_count(self):
+        return self.vector_db.get_data_count()
     
     def debug_retriever(self, question: str):
         """Debug method to check what the retriever returns"""
