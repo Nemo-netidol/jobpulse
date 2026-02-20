@@ -1,0 +1,64 @@
+from RAG.LLM_service import LLMService
+from dags.include.vector_db import VectorDatabase
+import streamlit as st
+import time
+
+
+CHROMA_DIR = "data/chroma_db"
+
+vector_db = VectorDatabase(CHROMA_DIR)
+llm_service = LLMService(vector_db)
+
+def stream_data(text):
+    for word in text.split(" "):
+        yield word + " "
+        time.sleep(0.02)
+
+st.title("JobPulse", width="stretch", anchor=False)
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+has_message_history = len(st.session_state.messages) > 0
+
+SUGGESTIONS = {
+    "Find me jobs that include RAG in job description": ":material/psychology: RAG Engineer",
+    "Find me AI Engineer jobs":                        ":material/smart_toy: AI Engineer",
+    "Find me Data Engineer jobs":                      ":material/storage: Data Engineer",
+    "Find me Software Engineer jobs":                  ":material/code: Software Engineer",
+    "Find me Machine Learning Engineer jobs":          ":material/model_training: ML Engineer",
+    "Find me Backend Engineer jobs":                   ":material/dns: Backend Engineer",
+    "Find me Frontend Engineer jobs":                  ":material/web: Frontend Engineer",
+    "Find me DevOps Engineer jobs":                    ":material/cloud_sync: DevOps",
+    "Find me Data Scientist jobs":                     ":material/bar_chart: Data Scientist",
+    "Find me Product Manager jobs":                    ":material/manage_accounts: Product Manager",
+}
+
+# ------ Show pills if no messages -----
+if not has_message_history:
+    selection = st.pills("", list(SUGGESTIONS.keys()), format_func=lambda x: SUGGESTIONS[x] )
+
+    if selection:
+        st.session_state.messages.append({"role": "user", "content": selection})
+        st.chat_message("user").markdown(selection)
+
+        response  = llm_service.query(selection)
+        st.session_state.messages.append({"role": "ai", "content": response})
+
+        st.rerun()
+
+
+# ------ handle chat input ------
+if prompt := st.chat_input("Say something"):
+    st.chat_message("user").markdown(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})
+
+    response  = llm_service.query(prompt)
+    st.session_state.messages.append({"role": "ai", "content": response})
+
+    st.rerun()
+
+    
+for message in st.session_state.messages:
+    with st.chat_message(message['role']):
+        st.markdown(message["content"])

@@ -1,9 +1,9 @@
 import os
-from langchain_huggingface import HuggingFaceEndpoint
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from huggingface_hub import InferenceClient
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def format_docs(docs):
     return "\n\n".join(
@@ -13,7 +13,7 @@ def format_docs(docs):
 
 class LLMService:
     def __init__(self, vector_db):
-        self.model_id = "swiss-ai/Apertus-8B-Instruct-2509"
+        self.model_id = "meta-llama/Llama-3.1-8B-Instruct"
         self.vector_db = vector_db
         self.client = InferenceClient(
             api_key=os.environ["HF_TOKEN"],
