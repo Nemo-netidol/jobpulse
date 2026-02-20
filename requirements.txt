@@ -1,6 +1,6 @@
 requests
 pydantic
-chromadb
+chromadb==1.3.0
 huggingface_hub
 tqdm
 python-dotenv

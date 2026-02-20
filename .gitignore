@@ -3,4 +3,3 @@ __pycache__/
 test/
 .DS_Store
 *.ipynb
-data/chroma_db/
