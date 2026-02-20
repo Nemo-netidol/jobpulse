@@ -9,12 +9,15 @@ CHROMA_DIR = "data/chroma_db"
 vector_db = VectorDatabase(CHROMA_DIR)
 llm_service = LLMService(vector_db)
 
+data_count = llm_service.get_data_count()
+
 def stream_data(text):
     for word in text.split(" "):
         yield word + " "
         time.sleep(0.02)
 
 st.title("JobPulse", width="stretch", anchor=False)
+st.caption(f"{data_count} jobs in database.")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
