@@ -1,8 +1,0 @@
-{"timestamp":"2026-01-26T03:31:29.524989Z","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
-{"timestamp":"2026-01-26T03:31:29.525317Z","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/daily_job_scraper.py","logger":"airflow.models.dagbag.DagBag","filename":"dagbag.py","lineno":593}
-{"timestamp":"2026-01-26T03:31:29.542238Z","level":"warning","event":"The `airflow.operators.python.PythonOperator` attribute is deprecated. Please use `'airflow.providers.standard.operators.python.PythonOperator'`.","category":"DeprecatedImportWarning","filename":"/opt/airflow/dags/daily_job_scraper.py","lineno":2,"logger":"py.warnings"}
-{"timestamp":"2026-01-26T03:31:29.551976Z","level":"info","event":"Task instance is in running state","logger":"task.stdout"}
-{"timestamp":"2026-01-26T03:31:29.554834Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","logger":"task.stdout"}
-{"timestamp":"2026-01-26T03:31:29.554940Z","level":"info","event":"Current task name:scrape_remoteOK","logger":"task.stdout"}
-{"timestamp":"2026-01-26T03:31:29.554992Z","level":"info","event":"Dag name:daily_job_scraper","logger":"task.stdout"}
-{"timestamp":"2026-01-26T03:31:29.555036Z","level":"info","event":"Starting RemoteOK scrape...","logger":"task.stdout"}

@@ -3,3 +3,18 @@ __pycache__/
 test/
 .DS_Store
 *.ipynb
+
+# Databases
+*.db
+*.sqlite3
+data/chroma_db/
+data/test_chroma_db/
+
+# Logs
+logs/
+
+# Data & Archives
+data/archive/
+data/jobpulse.db
+jobpulse.db
+jobs.json
