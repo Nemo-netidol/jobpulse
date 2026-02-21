@@ -2,14 +2,23 @@ from RAG.LLM_service import LLMService
 from dags.include.vector_db import VectorDatabase
 import streamlit as st
 import time
+import os
 
 
 CHROMA_DIR = "data/chroma_db"
 
+def check_seed():
+    if "HF_TOKEN" not in os.environ:
+        st.error("HF TO")
+        
+check_seed()
+
+
 vector_db = VectorDatabase(CHROMA_DIR)
 llm_service = LLMService(vector_db)
-
 data_count = llm_service.get_data_count()
+
+
 
 def stream_data(text):
     for word in text.split(" "):

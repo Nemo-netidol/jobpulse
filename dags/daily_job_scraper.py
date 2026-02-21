@@ -7,10 +7,14 @@ import pendulum
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import json
 
 from include.database import Database
 from include.embedding_service import EmbeddingService
 from include.vector_db import VectorDatabase
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 
 default_args = {
     'owner': 'jobpulse',
@@ -52,6 +56,30 @@ def scrape_remoteOK():
             continue
 
     print(f"Successfully stored {success_count}/{len(raw_jobs)} RemoteOK jobs")
+
+    # Export to jobs.json for Streamlit seeding
+    try:
+        root_json_path = os.path.join(project_root, 'jobs.json')
+        
+        existing_jobs = []
+        if os.path.exists(root_json_path):
+            with open(root_json_path, 'r') as f:
+                try:
+                    existing_jobs = json.load(f)
+                except json.JSONDecodeError:
+                    existing_jobs = []
+
+        existing_ids = {j.get('id') for j in existing_jobs}
+        # Filter out duplicate jobs
+        new_jobs = [j for j in raw_jobs if j.get('id') not in existing_ids]
+
+        combined_jobs = existing_jobs + new_jobs
+
+        with open(root_json_path, 'w') as f:
+            json.dump(combined_jobs, f)
+        print(f"Exported {len(new_jobs)} news jobs to {root_json_path}. Total jobs: {len(combined_jobs)}")
+    except Exception as e:
+        print(f"Optional JSON export failed: {e}")
 
     return success_count
 

@@ -87,7 +87,7 @@ class Database:
     
     def get_data_count(self):
         cursor = self.conn.execute("SELECT COUNT(*) FROM jobs")
-        return cursor.fetchall()
+        return cursor.fetchone()[0]
     
     def mark_as_embedded(self, job_id) -> bool:
         try:
