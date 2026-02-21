@@ -13,11 +13,12 @@ def format_docs(docs):
         title    = doc.metadata.get('title', 'N/A')
         company  = doc.metadata.get('company', 'N/A')
         location = doc.metadata.get('location', 'N/A')
+        url = doc.metadata.get('url', 'N/A')
         # Truncate long descriptions so the total prompt stays within token limits
         content  = doc.page_content[:MAX_CHARS_PER_DOC]
         if len(doc.page_content) > MAX_CHARS_PER_DOC:
             content += "..."
-        formatted.append(f"{title} at {company}, {location}: {content}")
+        formatted.append(f"{title} at {company}, {location}: {content}. Source: {url}")
     return "\n\n".join(formatted)
 
 class LLMService:
@@ -31,7 +32,7 @@ class LLMService:
         self.prompt = PromptTemplate.from_template("""You are a job search assistant.
 
 Use the following job postings to answer the user's question.
-If the answer is not in the context, say you don't know.
+Your task is to assist user to find jobs from the question they ask and use context to find the jobs. If there is no relevant context or job given to you, you can say that "at the moment, there is no job that you are looking for. Please wait for the job update in the future", or something like that. When you generating answer, don't forget to attach url source of the job.
 
 {context}
 

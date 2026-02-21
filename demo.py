@@ -17,7 +17,7 @@ def stream_data(text):
         time.sleep(0.02)
 
 st.title("JobPulse", width="stretch", anchor=False)
-st.caption(f"{data_count} jobs in database.")
+st.caption(f"{data_count} jobs in database")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []

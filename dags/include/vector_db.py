@@ -33,6 +33,7 @@ class VectorDatabase:
                     {job_data.get("description", "")}
                     {job_data.get("location", "")}
                     {job_data.get("posted_date", "")}
+                    {job_data.get("url", "")}
                     """.strip()
             
             document = Document(
@@ -42,7 +43,8 @@ class VectorDatabase:
                     'title': job_data.get('title', '')[:100],
                     'company': job_data.get('company', '')[:100],
                     'location': job_data.get('location', '')[:100],
-                    'post_date': job_data.get('post_date', '')
+                    'post_date': job_data.get('post_date', ''),
+                    'url': job_data.get('url', ''),
                 }
             )
 
