@@ -20,19 +20,25 @@ def seed_databases(json_path: str, db_path: str, chroma_dir: str):
         jobs_data = json.load(f)
 
     for job in jobs_data:
-        job = Job(
-            title=job.get('position', 'Unknown Title'),
+        job_obj = Job(
+            title=job.get('title') or job.get('position') or 'Unknown Title',
             company=job.get('company') or 'Unknown',
             description=job.get('description', ''),
             url=job.get('url', ''),
             location=job.get('location') or 'Unknown',
-            posted_date=job.get('date'),
+            posted_date=job.get('posted_date'),
             scraped_at=datetime.now()
         )
-        db.insert_job(job)
+        db.insert_job(job_obj)
 
     sync_service = EmbeddingService(db, vector_db)
-    sync_service.sync_embeddings()
+    # Sync in batches until no more jobs pending
+    while True:
+        stats = db.get_stats()
+        if stats['pending_embeddings'] == 0:
+            break
+        print(f"Syncing batch... {stats['pending_embeddings']} jobs remaining")
+        sync_service.sync_embeddings(batch_size=100)
 
     db.close()
     
