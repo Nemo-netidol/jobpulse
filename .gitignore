@@ -17,3 +17,5 @@ logs/
 data/archive/
 data/jobpulse.db
 jobpulse.db
+
+archive/
