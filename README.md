@@ -1,6 +1,8 @@
 # Jobpulse
 AI-powered job search assistant using RAG to help find relevant job postings.
 
+Check out [demo](https://nakornb-jobpulse.streamlit.app/) here!
+
 ## ⚒️ Tech Stack
 - **Airflow**: Workflow orchestration
 - **Chroma**: Vector database
@@ -17,7 +19,6 @@ docker compose up -d
 ```
 
 ## Future enchancement
-- [ ] streamlit web interface & deployment
 - [ ] Advance RAG techniques (CRAG, re-ranking docs, RAG Fusion)
 
 ## Author
