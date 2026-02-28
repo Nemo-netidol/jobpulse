@@ -69,7 +69,7 @@ class VectorDatabase:
             return []
         
     def as_retriever(self, k: int=5):
-        """Return LangChain retriever for use in chains"""
+        """Return LangChain retriever to use in chains"""
         return self.vectorstore.as_retriever(search_kwargs={"k": k})
         
     def get_stats(self):

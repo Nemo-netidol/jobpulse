@@ -86,7 +86,7 @@ def scrape_remoteOK():
 def sync_embedding():
     db = Database()
     vector_db = VectorDatabase()
-    service = EmbeddingService(db, vector_db, batch_size=30)
+    service = EmbeddingService(db, vector_db)
 
     result = service.sync_embeddings()
 

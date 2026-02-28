@@ -2,10 +2,11 @@ import os
 from langchain_core.prompts import PromptTemplate
 from huggingface_hub import InferenceClient
 from dotenv import load_dotenv
+from .RetrievalStrategy import RetrievalStrategy
 
 load_dotenv()
 
-MAX_CHARS_PER_DOC = 500
+MAX_CHARS_PER_DOC = 3000
 
 def format_docs(docs):
     formatted = []
@@ -22,17 +23,19 @@ def format_docs(docs):
     return "\n\n".join(formatted)
 
 class LLMService:
-    def __init__(self, vector_db):
+    def __init__(self, vector_db, strategy: RetrievalStrategy):
         self.model_id = "meta-llama/Llama-3.1-8B-Instruct"
         self.vector_db = vector_db
         self.client = InferenceClient(
             api_key=os.environ["HF_TOKEN"],
         )
+        self.strategy = strategy
+        self.retriever = vector_db.as_retriever(k=5)
         
         self.prompt = PromptTemplate.from_template("""You are a job search assistant.
 
 Use the following job postings to answer the user's question.
-Your task is to assist user to find jobs from the question they ask and use context to find the jobs. If there is no relevant context or job given to you, you can say that "at the moment, there is no job that you are looking for. Please wait for the job update in the future", or something like that. When you generating answer, don't forget to attach url source of the job.
+Your task is to assist user to find jobs from the question they ask and use context to find the jobs. If there is no relevant context or job given to you, you can say that "at the moment, there is no job that you are looking for. Please wait for the job update in the future", or something like that. When you generating answer, don't forget to attach url source, location, discription, and salary of the job.
 
 {context}
 
@@ -41,11 +44,18 @@ Your task is to assist user to find jobs from the question they ask and use cont
 Answer the question based on the above context: {question}
 """)       
 
+    def set_strategy(self, strategy: RetrievalStrategy):
+        """Setter function for retrievel strategy"""
+        self.strategy = strategy
+
     def query(self, question: str):
         try:
-            retriever = self.vector_db.as_retriever(k=5)
-            docs = retriever.invoke(question)
+            docs = self.strategy.retrieve(question, self.retriever)
+            # retriever = self.vector_db.as_retriever(k=5)
+            # docs = retriever.invoke(question)
+            # print("Docs:", docs)
             context = format_docs(docs=docs)
+            print("Context:", context)
             prompt = self.prompt.format(context=context, question=question)
 
             completion = self.client.chat.completions.create(

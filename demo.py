@@ -4,11 +4,14 @@ import streamlit as st
 import time
 import os
 from scripts.seed_db import seed_databases
+from RAG.SimpleRetrievalStrategy import SimpleRetrievalStrategy
+from RAG.RAGFusionStrategy import RAGFusionStrategy
 
 CHROMA_DIR = "data/chroma_db"
 
 vector_db = VectorDatabase(CHROMA_DIR)
-llm_service = LLMService(vector_db)
+strategy = RAGFusionStrategy()
+llm_service = LLMService(vector_db, strategy)
 # Helper to get current counts
 def get_db_stats():
     try:
