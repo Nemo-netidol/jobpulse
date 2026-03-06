@@ -36,7 +36,9 @@ dag = DAG(
 
 # Task: Scrape remoteOK
 def scrape_remoteOK():
-    """Fetch and store jobs from remoteOK"""
+    """
+    Fetch and store jobs from remoteOK
+    """
     print("Starting RemoteOK scrape...")
     scraper = RemoteOKScraper()
     raw_jobs = scraper.scrape_jobs()
@@ -57,29 +59,31 @@ def scrape_remoteOK():
 
     print(f"Successfully stored {success_count}/{len(raw_jobs)} RemoteOK jobs")
 
-    # Export to jobs.json for Streamlit seeding
+    # Export ALL jobs from SQLite to jobs.json for Streamlit seeding
     try:
         root_json_path = os.path.join(project_root, 'jobs.json')
-        
-        existing_jobs = []
-        if os.path.exists(root_json_path):
-            with open(root_json_path, 'r') as f:
-                try:
-                    existing_jobs = json.load(f)
-                except json.JSONDecodeError:
-                    existing_jobs = []
+        print(f"Exporting to: {root_json_path}")
 
-        existing_ids = {j.get('id') for j in existing_jobs}
-        # Filter out duplicate jobs
-        new_jobs = [j for j in raw_jobs if j.get('id') not in existing_ids]
+        # Get all jobs from database (returns list of dicts)
+        all_jobs = db.get_all_jobs()
+        print(f"Total jobs in SQLite: {len(all_jobs)}")
 
-        combined_jobs = existing_jobs + new_jobs
+        # Convert datetime objects to ISO format strings for JSON serialization
+        for job in all_jobs:
+            if job.get('posted_date') and hasattr(job['posted_date'], 'isoformat'):
+                job['posted_date'] = job['posted_date'].isoformat()
+            if job.get('scraped_at') and hasattr(job['scraped_at'], 'isoformat'):
+                job['scraped_at'] = job['scraped_at'].isoformat()
+            if job.get('embedded_at') and hasattr(job['embedded_at'], 'isoformat'):
+                job['embedded_at'] = job['embedded_at'].isoformat()
 
         with open(root_json_path, 'w') as f:
-            json.dump(combined_jobs, f)
-        print(f"Exported {len(new_jobs)} news jobs to {root_json_path}. Total jobs: {len(combined_jobs)}")
+            json.dump(all_jobs, f)
+        print(f"Successfully exported {len(all_jobs)} jobs to {root_json_path}")
     except Exception as e:
-        print(f"Optional JSON export failed: {e}")
+        import traceback
+        print(f"JSON export failed: {e}")
+        traceback.print_exc()
 
     return success_count
 
@@ -88,7 +92,7 @@ def sync_embedding():
     vector_db = VectorDatabase()
     service = EmbeddingService(db, vector_db)
 
-    result = service.sync_embeddings()
+    result = service.sync_embeddings(batch_size=None)
 
     return result
 

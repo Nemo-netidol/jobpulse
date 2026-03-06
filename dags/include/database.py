@@ -108,14 +108,22 @@ class Database:
             return False
         
     def get_jobs_without_embedding(self, limit=50):
-        cursor = self.conn.execute(
-            '''
-            SELECT * FROM jobs
-            WHERE has_embedded = FALSE
-            LIMIT ?
-            ''',
-            (limit,)
-        )
+        if limit is not None:
+            cursor = self.conn.execute(
+                '''
+                SELECT * FROM jobs
+                WHERE has_embedded = FALSE
+                LIMIT ?
+                ''',
+                (limit,)
+            )
+        else:
+            cursor = self.conn.execute(
+                '''
+                SELECT * FROM jobs
+                WHERE has_embedded = FALSE
+                ''',
+            )
         return [dict(row) for row in cursor.fetchall()]
     
     def get_stats(self):

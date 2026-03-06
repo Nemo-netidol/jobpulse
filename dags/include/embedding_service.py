@@ -1,6 +1,7 @@
 from .database import Database
 from .vector_db import VectorDatabase
 from typing import Dict
+from typing import Optional
 
 class EmbeddingService:
     """
@@ -11,7 +12,7 @@ class EmbeddingService:
         self.vector_db = vector_db
         print("✅ EmbeddingService ready")
     
-    def sync_embeddings(self, batch_size: int=20, delay=1.0) -> Dict:
+    def sync_embeddings(self, batch_size: Optional[int]) -> Dict:
         jobs = self.sql_db.get_jobs_without_embedding(batch_size)
 
         print(f"Found {len(jobs)} jobs to embed")

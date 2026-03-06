@@ -63,7 +63,6 @@ if "messages" not in st.session_state:
 has_message_history = len(st.session_state.messages) > 0
 
 SUGGESTIONS = {
-    "Find me jobs that include RAG in job description": ":material/psychology: RAG Engineer",
     "Find me AI Engineer jobs":                        ":material/smart_toy: AI Engineer",
     "Find me Data Engineer jobs":                      ":material/storage: Data Engineer",
     "Find me Software Engineer jobs":                  ":material/code: Software Engineer",
@@ -73,6 +72,7 @@ SUGGESTIONS = {
     "Find me DevOps Engineer jobs":                    ":material/cloud_sync: DevOps",
     "Find me Data Scientist jobs":                     ":material/bar_chart: Data Scientist",
     "Find me Product Manager jobs":                    ":material/manage_accounts: Product Manager",
+    "Find me Game Developer jobs":                    ":material/sports_esports: Game Developer",
 }
 
 # ------ Show pills if no messages -----
