@@ -45,12 +45,15 @@ def scrape_remoteOK():
 
     print(f"Fetched {len(raw_jobs)} raw jobs from RemoteOK")
 
-    db = Database()
+    db = Database('/opt/airflow/data/jobpulse-with-category.db')
     success_count = 0
 
     for job in raw_jobs:
         try:
             standard_job = RemoteOKAdapter.transform(job)
+            if standard_job is None:
+                continue
+            
             if db.insert_job(standard_job):
                 success_count += 1
         except Exception as e:
@@ -61,7 +64,7 @@ def scrape_remoteOK():
 
     # Export ALL jobs from SQLite to jobs.json for Streamlit seeding
     try:
-        root_json_path = os.path.join(project_root, 'jobs.json')
+        root_json_path = os.path.join(project_root, 'jobs-with-category.json')
         print(f"Exporting to: {root_json_path}")
 
         # Get all jobs from database (returns list of dicts)

@@ -12,3 +12,4 @@ class Job(BaseModel):
     scraped_at: datetime = Field(default_factory=datetime.now)
     has_embedded: bool = Field(default=False, description="This job has been embedded or not?")
     embedded_at: Optional[datetime] = None
+    category: Optional[str] = Field(default=None) # New field

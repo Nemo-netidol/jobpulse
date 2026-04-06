@@ -22,12 +22,13 @@ class Database:
                 description TEXT,
                 url TEXT UNIQUE NOT NULL,
                 location TEXT,
-                posted_date TEXT,
                 scraped_at TEXT NOT NULL,
                 has_embedded BOOLEAN DEFAULT FALSE,
-                embedded_at TEXT
+                embedded_at TEXT,
+                category TEXT
             )
         ''')
+        
 
         self.conn.commit()
 
@@ -36,8 +37,8 @@ class Database:
         cursor = self.conn.execute(
             '''
             INSERT OR IGNORE INTO jobs
-            (id, title, company, description, url, location, posted_date, scraped_at)
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+            (id, title, company, description, url, location, posted_date, scraped_at, category)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', 
             (   
                 job_id,
@@ -47,7 +48,8 @@ class Database:
                 str(job.url),
                 job.location,
                 job.posted_date.isoformat() if job.posted_date else None,
-                job.scraped_at.isoformat()
+                job.scraped_at.isoformat(),
+                job.category
             )
         )
         self.conn.commit()
