@@ -19,3 +19,5 @@ data/jobpulse.db
 jobpulse.db
 
 archive/
+
+gcp-key.json
