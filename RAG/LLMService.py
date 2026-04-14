@@ -6,18 +6,18 @@ from .RetrievalStrategy import RetrievalStrategy
 
 load_dotenv()
 
-MAX_CHARS_PER_DOC = 3000
+MAX_CHARS_PER_DOC = 5000
 
 def format_docs(docs):
     formatted = []
     for doc in docs:
-        title    = doc.metadata.get('title', 'N/A')
-        company  = doc.metadata.get('company', 'N/A')
-        location = doc.metadata.get('location', 'N/A')
-        url = doc.metadata.get('url', 'N/A')
+        title    = doc.get('title', 'N/A')
+        company  = doc.get('company', 'N/A')
+        location = doc.get('location', 'N/A')
+        url = doc.get('url', 'N/A')
         # Truncate long descriptions so the total prompt stays within token limits
-        content  = doc.page_content[:MAX_CHARS_PER_DOC]
-        if len(doc.page_content) > MAX_CHARS_PER_DOC:
+        content  = doc.get('description', '')[:MAX_CHARS_PER_DOC]
+        if len(doc.get('description', '')) > MAX_CHARS_PER_DOC:
             content += "..."
         formatted.append(f"{title} at {company}, {location}: {content}. Source: {url}")
     return "\n\n".join(formatted)
@@ -29,16 +29,30 @@ class LLMService:
         self.client = InferenceClient(
             api_key=os.environ["HF_TOKEN"],
         )
-        self.strategy = strategy
-        self.retriever = vector_db.as_retriever(k=5)
-        
-        self.prompt = PromptTemplate.from_template("""You are a job search assistant.
+        self.strategy = strategy        
+        self.prompt = PromptTemplate.from_template("""You are a friendly and helpful job search assistant.
 
-Use the following job postings to answer the user's question.
-Your task is to assist user to find jobs from the question they ask and use context to find the jobs. If there is no relevant context or job given to you, you can say that "at the moment, there is no job that you are looking for. Please wait for the job update in the future", or something like that. When you generating answer, don't forget to attach url source, location, discription, and salary of the job.
+Your goal is to help the user find the best job matches based on the provided context. 
 
+Start your response with a brief, friendly introduction about what you found (or didn't find).
+
+For each relevant job found, provide a concise summary using the following format:
+
+1. **[Job Title]** at **[Company]**
+   - **Location**: [Location]
+   - **Salary**: [Salary or "Not specified"]
+   - **Summary**: [A 3-4 sentence summary of key responsibilities and requirements]
+   - **Link**: [URL Source]
+
+Separate each job with a numbered label (1., 2., 3., etc.).
+
+After the list, provide a brief, encouraging closing statement.
+
+If there is no relevant context or job given to you, say something friendly like "I couldn't find any exact matches for that right now, but I'll keep an eye out as more jobs are posted!"
+
+---
+CONTEXT:
 {context}
-
 ---
 
 Answer the question based on the above context: {question}
@@ -50,12 +64,17 @@ Answer the question based on the above context: {question}
 
     def query(self, question: str):
         try:
-            docs = self.strategy.retrieve(question, self.retriever)
-            # retriever = self.vector_db.as_retriever(k=5)
-            # docs = retriever.invoke(question)
-            # print("Docs:", docs)
+            docs = self.strategy.retrieve(question, self.vector_db)
+            # Log docs
+            log_path = os.path.join(os.path.dirname(__file__), '..', 'test', 'logs', 'docs.txt')
+            with open(log_path, 'w', encoding='utf-8') as f:
+                for doc in docs:
+                    f.write(f"{doc}\n")
             context = format_docs(docs=docs)
-            print("Context:", context)
+            # Log context
+            log_path = os.path.join(os.path.dirname(__file__), '..', 'test', 'logs', 'context.txt')
+            with open(log_path, 'w', encoding='utf-8') as f:
+                f.write(context)
             prompt = self.prompt.format(context=context, question=question)
 
             completion = self.client.chat.completions.create(
@@ -66,8 +85,13 @@ Answer the question based on the above context: {question}
                         "content": prompt
                     }
                 ],
-                max_tokens=1024,
+                max_tokens=2048, # Increased to allow for longer descriptions
             )
+
+            # Log response
+            log_path = os.path.join(os.path.dirname(__file__), '..', 'test', 'logs', 'rag.txt')
+            with open(log_path, 'w', encoding='utf-8') as f:
+                f.write(completion.choices[0].message.content)
 
             return completion.choices[0].message.content
         except Exception as e:
@@ -80,11 +104,10 @@ Answer the question based on the above context: {question}
     def debug_retriever(self, question: str):
         """Debug method to check what the retriever returns"""
         try:
-            retriever = self.vector_db.as_retriever(k=5)
-            docs = retriever.invoke(question)
+            docs = self.strategy.retrieve(question, self.vector_db)
             print(f"Retriever returned {len(docs)} documents")
             for i, doc in enumerate(docs):
-                print(f"  Doc {i}: {doc.page_content[:100]}...")
+                print(f"  Doc {i}: {doc.get('description', '')[:100]}...")
             return docs
         except Exception as e:
             print(f"Retriever debug error: {e}")

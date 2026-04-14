@@ -1,20 +1,18 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.decorators import dag, task
 from datetime import datetime, timedelta
-from include.scraper.remoteOK import RemoteOKScraper
-from include.adapters.remoteOK_adapter import RemoteOKAdapter
+from scraper.remoteOK import RemoteOKScraper
+from adapters.remoteOK_adapter import RemoteOKAdapter
 import pendulum
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import json
 
-from include.database import Database
-from include.embedding_service import EmbeddingService
+from database import Database
+from services.embedding_service import EmbeddingService
 from include.vector_db import VectorDatabase
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
 
 default_args = {
     'owner': 'jobpulse',
@@ -25,111 +23,102 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-dag = DAG(
-    'daily_job_scraper',
+TEST_DATABASE = '/opt/airflow/data/jobpulse-with-category.db'
+
+@dag(
+    dag_id='daily_job_scraper',
     default_args=default_args,
     description='Scrape jobs from RemoteOK daily',
     schedule='0 2 * * *',
     start_date=pendulum.today('UTC').add(days=-2),
     catchup=True
 )
+def daily_job_scraper_dag():
 
-# Task: Scrape remoteOK
-def scrape_remoteOK():
-    """
-    Fetch and store jobs from remoteOK
-    """
-    print("Starting RemoteOK scrape...")
-    scraper = RemoteOKScraper()
-    raw_jobs = scraper.scrape_jobs()
+    @task()
+    def scrape_remoteOK():
+        """
+        Fetch and store jobs from remoteOK
+        """
+        print("Starting RemoteOK scrape...")
+        scraper = RemoteOKScraper()
+        raw_jobs = scraper.scrape_jobs()
 
-    print(f"Fetched {len(raw_jobs)} raw jobs from RemoteOK")
+        print(f"Fetched {len(raw_jobs)} raw jobs from RemoteOK")
 
-    db = Database('/opt/airflow/data/jobpulse-with-category.db')
-    success_count = 0
+        db = Database(TEST_DATABASE)
+        success_count = 0
 
-    for job in raw_jobs:
-        try:
-            standard_job = RemoteOKAdapter.transform(job)
-            if standard_job is None:
+        for job in raw_jobs:
+            try:
+                standard_job = RemoteOKAdapter.transform(job)
+                if standard_job is None:
+                    continue
+
+                if db.insert_job(standard_job):
+                    success_count += 1
+            except Exception as e:
+                print(f"Error processing job:", e)
                 continue
-            
-            if db.insert_job(standard_job):
-                success_count += 1
+
+        print(f"Successfully stored {success_count}/{len(raw_jobs)} RemoteOK jobs")
+
+        # Export ALL jobs from SQLite to jobs.json for Streamlit seeding
+        try:
+            root_json_path = os.path.join(project_root, 'jobs-with-category.json')
+            print(f"Exporting to: {root_json_path}")
+
+            # Get all jobs from database (returns list of dicts)
+            all_jobs = db.get_all_jobs()
+            print(f"Total jobs in SQLite: {len(all_jobs)}")
+
+            # Convert datetime objects to ISO format strings for JSON serialization
+            for job in all_jobs:
+                if job.get('posted_date') and hasattr(job['posted_date'], 'isoformat'):
+                    job['posted_date'] = job['posted_date'].isoformat()
+                if job.get('scraped_at') and hasattr(job['scraped_at'], 'isoformat'):
+                    job['scraped_at'] = job['scraped_at'].isoformat()
+                if job.get('embedded_at') and hasattr(job['embedded_at'], 'isoformat'):
+                    job['embedded_at'] = job['embedded_at'].isoformat()
+
+            with open(root_json_path, 'w') as f:
+                json.dump(all_jobs, f)
+            print(f"Successfully exported {len(all_jobs)} jobs to {root_json_path}")
         except Exception as e:
-            print(f"Error processing job:", e)
-            continue
+            import traceback
+            print(f"JSON export failed: {e}")
+            traceback.print_exc()
 
-    print(f"Successfully stored {success_count}/{len(raw_jobs)} RemoteOK jobs")
+        return success_count
 
-    # Export ALL jobs from SQLite to jobs.json for Streamlit seeding
-    try:
-        root_json_path = os.path.join(project_root, 'jobs-with-category.json')
-        print(f"Exporting to: {root_json_path}")
+    @task()
+    def sync_embedding():
+        db = Database(TEST_DATABASE)
+        vector_db = VectorDatabase()
+        service = EmbeddingService(db, vector_db)
 
-        # Get all jobs from database (returns list of dicts)
-        all_jobs = db.get_all_jobs()
-        print(f"Total jobs in SQLite: {len(all_jobs)}")
+        result = service.sync_embeddings(batch_size=None)
 
-        # Convert datetime objects to ISO format strings for JSON serialization
-        for job in all_jobs:
-            if job.get('posted_date') and hasattr(job['posted_date'], 'isoformat'):
-                job['posted_date'] = job['posted_date'].isoformat()
-            if job.get('scraped_at') and hasattr(job['scraped_at'], 'isoformat'):
-                job['scraped_at'] = job['scraped_at'].isoformat()
-            if job.get('embedded_at') and hasattr(job['embedded_at'], 'isoformat'):
-                job['embedded_at'] = job['embedded_at'].isoformat()
+        return result
 
-        with open(root_json_path, 'w') as f:
-            json.dump(all_jobs, f)
-        print(f"Successfully exported {len(all_jobs)} jobs to {root_json_path}")
-    except Exception as e:
-        import traceback
-        print(f"JSON export failed: {e}")
-        traceback.print_exc()
+    @task()
+    def summary():
+        sql_db = Database()
+        embed_result = sql_db.get_stats()
+        summary_text = f"""
+        ====================================
+        JobPulse Daily Run Summary
+        ====================================
+        Database Status:
+           Total Jobs: {embed_result.get('total_jobs', 0)}
+           With Embeddings: {embed_result.get('embedded_jobs', 0)}
+           Pending: {embed_result.get('pending_embeddings', 0)}
+        """
+        print(summary_text)
+        return summary_text
 
-    return success_count
+    # Set dependencies
+    scrape_remoteOK() >> sync_embedding() >> summary()
 
-def sync_embedding():
-    db = Database()
-    vector_db = VectorDatabase()
-    service = EmbeddingService(db, vector_db)
-
-    result = service.sync_embeddings(batch_size=None)
-
-    return result
-
-def summary():
-    sql_db = Database()
-    embed_result = sql_db.get_stats()
-    summary = f"""
-    ====================================
-    JobPulse Daily Run Summary
-    ====================================
-    Database Status:
-       Total Jobs: {embed_result.get('total_jobs', 0)}
-       With Embeddings: {embed_result.get('embedded_jobs', 0)}
-       Pending: {embed_result.get('pending_embeddings', 0)}
-    """
-    print(summary)
-    return summary
-
-task_remoteOK = PythonOperator(
-    task_id='scrape_remoteOK',
-    python_callable=scrape_remoteOK,
-    dag=dag
-)
-
-task_sync = PythonOperator(
-    task_id='sync_embeddings',
-    python_callable=sync_embedding,
-    dag=dag
-)
-
-task_summary = PythonOperator(
-    task_id='summary',
-    python_callable=summary,
-    dag=dag
-)
-
-task_remoteOK >> task_sync >> task_summary
+# Instantiate the DAG
+daily_job_scraper_dag()

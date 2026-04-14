@@ -22,6 +22,7 @@ class Database:
                 description TEXT,
                 url TEXT UNIQUE NOT NULL,
                 location TEXT,
+                posted_date TEXT,
                 scraped_at TEXT NOT NULL,
                 has_embedded BOOLEAN DEFAULT FALSE,
                 embedded_at TEXT,

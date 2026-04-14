@@ -1,6 +1,7 @@
-from include.models import Job
+from models import Job
 from datetime import datetime
-from include.JobClassificationService import classify_category
+from services.JobClassificationService import classify_category
+from utils import clean_text
 
 class RemoteOKAdapter:
     @staticmethod
@@ -8,13 +9,16 @@ class RemoteOKAdapter:
         if not raw_job.get('position') or not raw_job.get('company'):
             return None
 
+        raw_description = raw_job.get('description', '')
+        cleaned_description = clean_text(raw_description)
+
         return Job(
             title=raw_job.get('position', 'Unknown Title'),
             company=raw_job.get('company') or 'Unknown',
-            description=raw_job.get('description', ''),
+            description=cleaned_description,
             url=raw_job.get('url') if raw_job.get('url') else None,
             location=raw_job.get('location') or 'Unknown',
             posted_date=raw_job.get('date'),
             scraped_at=datetime.now(),
-            category=classify_category(raw_job.get('position'), raw_job.get('description'))
+            category=classify_category(raw_job.get('position'), cleaned_description)
         )
