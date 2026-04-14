@@ -1,105 +1,133 @@
-from RAG.LLM_service import LLMService
-from dags.include.vector_db import VectorDatabase
+from RAG import LLMService, SimpleRetrievalStrategy
+from services.vector_db.QdrantService import QdrantService
+from services.BigQueryService import BigQueryService
 import streamlit as st
-import time
+from streamlit_echarts import st_echarts
 import os
-from scripts.seed_db import seed_databases
-from RAG.SimpleRetrievalStrategy import SimpleRetrievalStrategy
-from RAG.RAGFusionStrategy import RAGFusionStrategy
 
-CHROMA_DIR = "data/chroma_db"
+# Load connection settings from environment
+QDRANT_API_KEY = os.getenv('QDRANT_API_KEY')
+QDRANT_ENDPOINT = os.getenv('QDRANT_CLUSTER_ENDPOINT', 'http://qdrant:6333')
+QDRANT_LOCAL_MODE = os.getenv('QDRANT_LOCAL_MODE', 'True').lower() == 'true'
 
-vector_db = VectorDatabase(CHROMA_DIR)
-strategy = RAGFusionStrategy()
-llm_service = LLMService(vector_db, strategy)
-# Helper to get current counts
-def get_db_stats():
-    try:
-        data_count = vector_db.get_data_count()
-        return data_count
-    except Exception as e:
-        st.sidebar.error(f"Error getting Chroma count: {e}")
-        return 0
-
-data_count = get_db_stats()
-
-def check_seed():
-    if "HF_TOKEN" not in os.environ: 
-        st.error("HF_TOKEN missing! Please add it to Streamlit Secrets or .env file.")
-        st.info("Go to Settings -> Secrets and add HF_TOKEN = 'your_token_here'")
-        st.stop()
+# Initialize Services
+@st.cache_resource
+def init_services():
+    qdrant = QdrantService(
+        API_KEY=QDRANT_API_KEY, 
+        url=QDRANT_ENDPOINT, 
+        local=QDRANT_LOCAL_MODE
+    )
+    strategy = SimpleRetrievalStrategy()
+    llm = LLMService(qdrant, strategy)
     
-    if data_count == 0:
-        st.warning("No jobs found in the vector database. Starting initial seeding...")
-        placeholder = st.empty()
-        with placeholder.status("Seeding databases (this may take a minute)...", expanded=True) as status:
-            st.write("Reading jobs.json...")
-            try:
-                seed_databases(json_path="jobs.json", db_path="data/jobpulse.db", chroma_dir=CHROMA_DIR)
-                st.write("Syncing embeddings to Chroma...")
-                status.update(label="Seeding completed!", state="complete", expanded=False)
-                st.success("Databases seeded successfully!")
-                time.sleep(1) # Give user a moment to see success
-                st.rerun()
-            except Exception as e:
-                status.update(label="Seeding failed!", state="error")
-                st.error(f"Seeding failed: {str(e)}")
-                st.stop()
+    # Mock Hook for BigQuery (since we are outside Airflow)
+    class BQHook:
+        def get_client(self):
+            from google.cloud import bigquery
+            # Assumes gcp-key.json is in root
+            return bigquery.Client.from_service_account_json("gcp-key.json")
+    
+    bq_service = BigQueryService(BQHook())
+    return qdrant, llm, bq_service
 
-check_seed()
+qdrant_service, llm_service, bq_service = init_services()
 
+# --- Cached Data Fetching ---
+@st.cache_data(ttl=3600)
+def fetch_analytics():
+    return bq_service.get_category_stats()
 
-def stream_data(text):
-    for word in text.split(" "):
-        yield word + " "
-        time.sleep(0.02)
+@st.cache_data(ttl=600)
+def get_total_count():
+    stats = qdrant_service.get_stats()
+    return stats.get("total_points", 0)
 
-st.title("JobPulse", width="stretch", anchor=False)
-st.caption(f"{data_count} jobs in database")
+data_count = get_total_count()
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# --- UI Layout ---
+st.set_page_config(page_title="JobPulse", page_icon="🚀", layout="wide")
 
-has_message_history = len(st.session_state.messages) > 0
+st.title("JobPulse", anchor=False)
 
-SUGGESTIONS = {
-    "Find me AI Engineer jobs":                        ":material/smart_toy: AI Engineer",
-    "Find me Data Engineer jobs":                      ":material/storage: Data Engineer",
-    "Find me Software Engineer jobs":                  ":material/code: Software Engineer",
-    "Find me Machine Learning Engineer jobs":          ":material/model_training: ML Engineer",
-    "Find me Backend Engineer jobs":                   ":material/dns: Backend Engineer",
-    "Find me Frontend Engineer jobs":                  ":material/web: Frontend Engineer",
-    "Find me DevOps Engineer jobs":                    ":material/cloud_sync: DevOps",
-    "Find me Data Scientist jobs":                     ":material/bar_chart: Data Scientist",
-    "Find me Product Manager jobs":                    ":material/manage_accounts: Product Manager",
-    "Find me Game Developer jobs":                    ":material/sports_esports: Game Developer",
-}
+# Create Tabs for Authority
+tab_chat, tab_insights = st.tabs(["💬 Job Assistant", "📊 Market Insights"])
 
-# ------ Show pills if no messages -----
-if not has_message_history:
-    selection = st.pills("", list(SUGGESTIONS.keys()), format_func=lambda x: SUGGESTIONS[x] )
+with tab_chat:
+    st.caption(f"🚀 Connected to Qdrant Cloud | {data_count} jobs indexed")
 
-    if selection:
-        st.session_state.messages.append({"role": "user", "content": selection})
-        st.chat_message("user").markdown(selection)
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-        response  = llm_service.query(selection)
+    has_message_history = len(st.session_state.messages) > 0
+
+    SUGGESTIONS = {
+        "Find me AI Engineer jobs": ":material/smart_toy: AI Engineer",
+        "Find me Data Engineer jobs": ":material/storage: Data Engineer",
+        "Find me Software Engineer jobs": ":material/code: Software Engineer",
+        "Find me Machine Learning Engineer jobs": ":material/model_training: ML Engineer",
+    }
+
+    if not has_message_history:
+        selection = st.pills("Suggested Searches", list(SUGGESTIONS.keys()), format_func=lambda x: SUGGESTIONS[x] )
+        if selection:
+            st.session_state.messages.append({"role": "user", "content": selection})
+            with st.spinner("Searching..."):
+                response  = llm_service.query(selection)
+            st.session_state.messages.append({"role": "ai", "content": response})
+            st.rerun()
+
+    # 1. Display Chat History FIRST
+    for message in st.session_state.messages:
+        with st.chat_message(message['role']):
+            st.markdown(message["content"])
+
+    # 2. Display Chat Input LAST
+    if prompt := st.chat_input("Ask about jobs..."):
+        st.chat_message("user").markdown(prompt)
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.spinner("Searching Qdrant..."):
+            response  = llm_service.query(prompt)
         st.session_state.messages.append({"role": "ai", "content": response})
-
         st.rerun()
 
-
-# ------ handle chat input ------
-if prompt := st.chat_input("Say something"):
-    st.chat_message("user").markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-
-    response  = llm_service.query(prompt)
-    st.session_state.messages.append({"role": "ai", "content": response})
-
-    st.rerun()
-
+with tab_insights:
+    st.subheader("Live Market Composition")
     
-for message in st.session_state.messages:
-    with st.chat_message(message['role']):
-        st.markdown(message["content"])
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.metric("Total Jobs Indexed", data_count)
+        cat_data = fetch_analytics()
+        if cat_data:
+            top_cat = cat_data[0]['name']
+            st.info(f"🔥 **{top_cat}** is currently the most active category.")
+
+    with col2:
+        if cat_data:
+            options = {
+                "tooltip": {"trigger": "item"},
+                "legend": {"top": "5%", "left": "center"},
+                "series": [
+                    {
+                        "name": "Job Categories",
+                        "type": "pie",
+                        "radius": ["40%", "70%"],
+                        "avoidLabelOverlap": False,
+                        "itemStyle": {
+                            "borderRadius": 10,
+                            "borderColor": "#fff",
+                            "borderWidth": 2,
+                        },
+                        "label": {"show": False, "position": "center"},
+                        "emphasis": {
+                            "label": {"show": True, "fontSize": "20", "fontWeight": "bold"}
+                        },
+                        "labelLine": {"show": False},
+                        "data": cat_data,
+                    }
+                ],
+            }
+            st_echarts(options=options, height="500px")
+        else:
+            st.info("No category data available yet.")
