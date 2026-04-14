@@ -4,44 +4,74 @@ from services.BigQueryService import BigQueryService
 import streamlit as st
 from streamlit_echarts import st_echarts
 import os
+import json
 
-# Load connection settings from environment
+# --- Configuration & Secrets ---
+# Streamlit Cloud automatically maps Secrets to Environment Variables
 QDRANT_API_KEY = os.getenv('QDRANT_API_KEY')
-QDRANT_ENDPOINT = os.getenv('QDRANT_CLUSTER_ENDPOINT', 'http://qdrant:6333')
-QDRANT_LOCAL_MODE = os.getenv('QDRANT_LOCAL_MODE', 'True').lower() == 'true'
+QDRANT_ENDPOINT = os.getenv('QDRANT_CLUSTER_ENDPOINT')
+# Default to False (Cloud Mode) unless explicitly set to 'true'
+QDRANT_LOCAL_MODE = os.getenv('QDRANT_LOCAL_MODE', 'False').lower() == 'true'
 
 # Initialize Services
 @st.cache_resource
 def init_services():
+    # Validation
+    if not QDRANT_LOCAL_MODE and not QDRANT_ENDPOINT:
+        st.error("Missing QDRANT_CLUSTER_ENDPOINT! Please add it to Streamlit Secrets.")
+        st.stop()
+        
     qdrant = QdrantService(
         API_KEY=QDRANT_API_KEY, 
-        url=QDRANT_ENDPOINT, 
+        url=QDRANT_ENDPOINT or 'http://localhost:6333', 
         local=QDRANT_LOCAL_MODE
     )
     strategy = SimpleRetrievalStrategy()
     llm = LLMService(qdrant, strategy)
     
-    # Mock Hook for BigQuery (since we are outside Airflow)
     class BQHook:
         def get_client(self):
             from google.cloud import bigquery
-            # Assumes gcp-key.json is in root
-            return bigquery.Client.from_service_account_json("gcp-key.json")
+            
+            # 1. Try Streamlit Secrets (Recommended for Cloud)
+            # Create a secret named "gcp_service_account" with the JSON content
+            if "gcp_service_account" in st.secrets:
+                info = dict(st.secrets["gcp_service_account"])
+                return bigquery.Client.from_service_account_info(info)
+            
+            # 2. Try local file (For local development)
+            if os.path.exists("gcp-key.json"):
+                return bigquery.Client.from_service_account_json("gcp-key.json")
+            
+            # 3. Fallback to default environment credentials
+            return bigquery.Client()
     
     bq_service = BigQueryService(BQHook())
     return qdrant, llm, bq_service
 
-qdrant_service, llm_service, bq_service = init_services()
+try:
+    qdrant_service, llm_service, bq_service = init_services()
+except Exception as e:
+    st.error(f"Failed to initialize services: {e}")
+    st.info("Check your Qdrant URL and API Key in Streamlit Secrets.")
+    st.stop()
 
 # --- Cached Data Fetching ---
 @st.cache_data(ttl=3600)
 def fetch_analytics():
-    return bq_service.get_category_stats()
+    try:
+        return bq_service.get_category_stats()
+    except Exception as e:
+        st.warning(f"Could not fetch analytics from BigQuery: {e}")
+        return []
 
 @st.cache_data(ttl=600)
 def get_total_count():
-    stats = qdrant_service.get_stats()
-    return stats.get("total_points", 0)
+    try:
+        stats = qdrant_service.get_stats()
+        return stats.get("total_points", 0)
+    except:
+        return 0
 
 data_count = get_total_count()
 
@@ -50,7 +80,7 @@ st.set_page_config(page_title="JobPulse", page_icon="🚀", layout="wide")
 
 st.title("JobPulse", anchor=False)
 
-# Create Tabs for Authority
+# Create Tabs
 tab_chat, tab_insights = st.tabs(["💬 Job Assistant", "📊 Market Insights"])
 
 with tab_chat:
@@ -77,12 +107,12 @@ with tab_chat:
             st.session_state.messages.append({"role": "ai", "content": response})
             st.rerun()
 
-    # 1. Display Chat History FIRST
+    # Display Chat History
     for message in st.session_state.messages:
         with st.chat_message(message['role']):
             st.markdown(message["content"])
 
-    # 2. Display Chat Input LAST
+    # Chat Input
     if prompt := st.chat_input("Ask about jobs..."):
         st.chat_message("user").markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
@@ -130,4 +160,4 @@ with tab_insights:
             }
             st_echarts(options=options, height="500px")
         else:
-            st.info("No category data available yet.")
+            st.info("Analytics data is currently unavailable.")
