@@ -35,8 +35,14 @@ def init_services():
         def get_client(self):
             from google.cloud import bigquery
             
+            # DEBUG: Show what secrets are available (REMOVE after debugging)
+            st.sidebar.write("🔍 **Debug: Available secret sections:**", list(st.secrets.keys()))
+            if "gcp_service_account" in st.secrets:
+                st.sidebar.write("✅ gcp_service_account found, keys:", list(st.secrets["gcp_service_account"].keys()))
+            else:
+                st.sidebar.write("❌ gcp_service_account NOT found in secrets")
+            
             # 1. Try Streamlit Secrets (Recommended for Cloud)
-            # Create a secret named "gcp_service_account" with the JSON content
             if "gcp_service_account" in st.secrets:
                 info = dict(st.secrets["gcp_service_account"])
                 return bigquery.Client.from_service_account_info(info, project=GCP_PROJECT)
@@ -45,8 +51,12 @@ def init_services():
             if os.path.exists("gcp-key.json"):
                 return bigquery.Client.from_service_account_json("gcp-key.json", project=GCP_PROJECT)
             
-            # 3. Fallback to default environment credentials
-            return bigquery.Client(project=GCP_PROJECT)
+            # 3. No credentials found
+            raise RuntimeError(
+                "No GCP credentials found. "
+                "Add a [gcp_service_account] section to Streamlit Secrets, "
+                "or place a gcp-key.json file in the project root for local dev."
+            )
     
     bq_service = BigQueryService(BQHook())
     return qdrant, llm, bq_service
