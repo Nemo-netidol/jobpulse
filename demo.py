@@ -29,6 +29,8 @@ def init_services():
     strategy = SimpleRetrievalStrategy()
     llm = LLMService(qdrant, strategy)
     
+    GCP_PROJECT = "jobpulse-492611"
+    
     class BQHook:
         def get_client(self):
             from google.cloud import bigquery
@@ -37,14 +39,14 @@ def init_services():
             # Create a secret named "gcp_service_account" with the JSON content
             if "gcp_service_account" in st.secrets:
                 info = dict(st.secrets["gcp_service_account"])
-                return bigquery.Client.from_service_account_info(info)
+                return bigquery.Client.from_service_account_info(info, project=GCP_PROJECT)
             
             # 2. Try local file (For local development)
             if os.path.exists("gcp-key.json"):
-                return bigquery.Client.from_service_account_json("gcp-key.json")
+                return bigquery.Client.from_service_account_json("gcp-key.json", project=GCP_PROJECT)
             
             # 3. Fallback to default environment credentials
-            return bigquery.Client()
+            return bigquery.Client(project=GCP_PROJECT)
     
     bq_service = BigQueryService(BQHook())
     return qdrant, llm, bq_service
@@ -53,7 +55,7 @@ try:
     qdrant_service, llm_service, bq_service = init_services()
 except Exception as e:
     st.error(f"Failed to initialize services: {e}")
-    st.info("Check your Qdrant URL and API Key in Streamlit Secrets.")
+    st.info("Check your Qdrant URL/API Key and GCP service account in Streamlit Secrets.")
     st.stop()
 
 # --- Cached Data Fetching ---
