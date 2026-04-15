@@ -31,30 +31,34 @@ def init_services():
     
     GCP_PROJECT = "jobpulse-492611"
     
+    GCP_SA_KEYS = ["type", "project_id", "private_key_id", "private_key",
+                    "client_email", "client_id", "auth_uri", "token_uri",
+                    "auth_provider_x509_cert_url", "client_x509_cert_url"]
+    
     class BQHook:
         def get_client(self):
             from google.cloud import bigquery
             
-            # DEBUG: Show what secrets are available (REMOVE after debugging)
-            st.sidebar.write("🔍 **Debug: Available secret sections:**", list(st.secrets.keys()))
-            if "gcp_service_account" in st.secrets:
-                st.sidebar.write("✅ gcp_service_account found, keys:", list(st.secrets["gcp_service_account"].keys()))
-            else:
-                st.sidebar.write("❌ gcp_service_account NOT found in secrets")
-            
-            # 1. Try Streamlit Secrets (Recommended for Cloud)
+            # 1. Try nested [gcp_service_account] section in Streamlit Secrets
             if "gcp_service_account" in st.secrets:
                 info = dict(st.secrets["gcp_service_account"])
                 return bigquery.Client.from_service_account_info(info, project=GCP_PROJECT)
             
-            # 2. Try local file (For local development)
+            # 2. Try flat top-level GCP keys in Streamlit Secrets
+            if "type" in st.secrets and "private_key" in st.secrets:
+                info = {k: st.secrets[k] for k in GCP_SA_KEYS if k in st.secrets}
+                if "universe_domain" in st.secrets:
+                    info["universe_domain"] = st.secrets["universe_domain"]
+                return bigquery.Client.from_service_account_info(info, project=GCP_PROJECT)
+            
+            # 3. Try local file (For local development)
             if os.path.exists("gcp-key.json"):
                 return bigquery.Client.from_service_account_json("gcp-key.json", project=GCP_PROJECT)
             
-            # 3. No credentials found
+            # 4. No credentials found
             raise RuntimeError(
                 "No GCP credentials found. "
-                "Add a [gcp_service_account] section to Streamlit Secrets, "
+                "Add GCP service account keys to Streamlit Secrets, "
                 "or place a gcp-key.json file in the project root for local dev."
             )
     
