@@ -1,3 +1,11 @@
+import os
+import sys
+
+# Add project root to sys.path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 from airflow.providers.google.cloud.hooks.bigquery import BigQueryHook
@@ -6,12 +14,8 @@ from datetime import timedelta
 from airflow.sdk import dag, task
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 import pendulum
-import sys
-import os
 import hashlib
-
 from services.vector_db.QdrantService import QdrantService
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from services.BigQueryService import BigQueryService
 from adapters.remoteOK_adapter import RemoteOKAdapter
 from database import Database

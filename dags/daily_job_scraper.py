@@ -1,18 +1,19 @@
-from airflow.decorators import dag, task
-from datetime import datetime, timedelta
-from scraper.remoteOK import RemoteOKScraper
-from adapters.remoteOK_adapter import RemoteOKAdapter
-import pendulum
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import sys
+import pendulum
 import json
-
-from database import Database
-from services.embedding_service import EmbeddingService
-from include.vector_db import VectorDatabase
+from datetime import datetime, timedelta
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from airflow.decorators import dag, task
+from scraper.remoteOK import RemoteOKScraper
+from adapters.remoteOK_adapter import RemoteOKAdapter
+from database import Database
+from services.embedding_service import EmbeddingService
+from services.vector_db import ChromaService
 
 default_args = {
     'owner': 'jobpulse',
@@ -94,7 +95,7 @@ def daily_job_scraper_dag():
     @task()
     def sync_embedding():
         db = Database(TEST_DATABASE)
-        vector_db = VectorDatabase()
+        vector_db = ChromaService()
         service = EmbeddingService(db, vector_db)
 
         result = service.sync_embeddings(batch_size=None)

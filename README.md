@@ -13,7 +13,12 @@ Check out [demo](https://nakornb-jobpulse.streamlit.app/) here!
 - **Streamlit**: RAG chat interface
 
 ## 🏗️ Architecture
-![Project Architecture](architecture.png)
+![Project Architecture](screenshoots/architecture.png)
+
+## Pipeline in Action
+![DAG Graph](screenshoots/dags.png)
+![Successful Run](screenshoots/airflow_to_GCS_bucket-graph.png)
+
 
 ## 💻 Installation
 
